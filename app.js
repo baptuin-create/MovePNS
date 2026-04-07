@@ -57,7 +57,7 @@ async function loadUsers() {
   state.users = raw ? JSON.parse(raw) : [];
 
   const data = await gasCall({ action: "getUsers" });
-  if (data && data.ok) {
+  if (data && data.ok && Array.isArray(data.users)) {
     state.users = data.users;
     localStorage.setItem("mpnsUsers", JSON.stringify(state.users));
   }
@@ -72,12 +72,11 @@ async function saveNewUser(user) {
 
 /** Charge les trajets (Sheets → state.offers) */
 async function loadOffers() {
-  // D'abord le cache local pour affichage immédiat
   const raw = localStorage.getItem("mpnsOffers");
   state.offers = raw ? JSON.parse(raw) : [...DEMO_OFFERS];
 
   const data = await gasCall({ action: "getOffers" });
-  if (data && data.ok && data.offers.length > 0) {
+  if (data && data.ok && Array.isArray(data.offers) && data.offers.length > 0) {
     state.offers = data.offers;
     localStorage.setItem("mpnsOffers", JSON.stringify(state.offers));
   }
