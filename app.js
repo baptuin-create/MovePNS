@@ -2,7 +2,6 @@
    MOVEPNS – app.js
    Logique : Navigation · Auth · Trajets · CO₂
    Stockage : Google Sheets via Apps Script
-   
 ═══════════════════════════════════════════════ */
 
 "use strict";
@@ -11,7 +10,7 @@
    ⚙️  CONFIGURATION – À MODIFIER APRÈS DÉPLOIEMENT
    Colle ici l'URL obtenue depuis Google Apps Script
 ────────────────────────────────────────────── */
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyO1W_z14QVs8zevOlN7-abznHnq4-Hh-2sdDDva8SrOHsoAKow5rnvCZBHCeRpuZoK/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbw1EqDXtvvXmOY77rScT_k_9XfbCGeS34RveUdrK7LEPYvU8vwP-Y-yJPjDInmzV-7_/exec";
 // Exemple : "https://script.google.com/macros/s/AKfycbx.../exec"
 
 /* ──────────────────────────────────────────────
@@ -31,20 +30,16 @@ const state = {
 /** Appel générique vers Google Apps Script */
 async function gasCall(payload) {
   if (!GAS_URL || GAS_URL === "COLLE_TON_URL_ICI") {
+    // Fallback localStorage si l'URL n'est pas configurée
     return null;
   }
-
   try {
-    await fetch(GAS_URL, {
+    const res = await fetch(GAS_URL, {
       method: "POST",
-      mode: "no-cors", // 🔥 correction principale
-      headers: { "Content-Type": "text/plain" },
+      headers: { "Content-Type": "text/plain" }, // requis pour éviter le CORS preflight
       body: JSON.stringify(payload),
     });
-
-    // Avec no-cors, on ne peut pas lire la réponse
-    return { ok: true };
-
+    return await res.json();
   } catch (err) {
     console.warn("Google Sheets inaccessible, fallback localStorage", err);
     return null;
@@ -57,7 +52,7 @@ async function loadUsers() {
   state.users = raw ? JSON.parse(raw) : [];
 
   const data = await gasCall({ action: "getUsers" });
-  if (data && data.ok && Array.isArray(data.users)) {
+  if (data && data.ok) {
     state.users = data.users;
     localStorage.setItem("mpnsUsers", JSON.stringify(state.users));
   }
@@ -72,11 +67,12 @@ async function saveNewUser(user) {
 
 /** Charge les trajets (Sheets → state.offers) */
 async function loadOffers() {
+  // D'abord le cache local pour affichage immédiat
   const raw = localStorage.getItem("mpnsOffers");
   state.offers = raw ? JSON.parse(raw) : [...DEMO_OFFERS];
 
   const data = await gasCall({ action: "getOffers" });
-  if (data && data.ok && Array.isArray(data.offers) && data.offers.length > 0) {
+  if (data && data.ok && data.offers.length > 0) {
     state.offers = data.offers;
     localStorage.setItem("mpnsOffers", JSON.stringify(state.offers));
   }
