@@ -1,9 +1,17 @@
 /* ═══════════════════════════════════════════════
    MOVEPNS – app.js
    Logique : Navigation · Auth · Trajets · CO₂
+   Stockage : Google Sheets via Apps Script
 ═══════════════════════════════════════════════ */
 
 "use strict";
+
+/* ──────────────────────────────────────────────
+   ⚙️  CONFIGURATION – À MODIFIER APRÈS DÉPLOIEMENT
+   Colle ici l'URL obtenue depuis Google Apps Script
+────────────────────────────────────────────── */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwf07AQeDhYZ3lqyLXb597EZyacr7zc35yxEm4IByqC-deKi5rjzsh-2BBy98O6J1up/exec";
+// Exemple : "https://script.google.com/macros/s/AKfycbx.../exec"
 
 /* ──────────────────────────────────────────────
    STATE
@@ -14,26 +22,83 @@ const state = {
   users: [],
 };
 
-function loadUsers() {
-  const raw = localStorage.getItem("mpnsUsers");
-  state.users = raw ? JSON.parse(raw) : [];
-}
+/* ──────────────────────────────────────────────
+   COUCHE GOOGLE SHEETS
+   Toutes les lectures/écritures passent par ici
+────────────────────────────────────────────── */
 
-function saveUsers() {
-  localStorage.setItem("mpnsUsers", JSON.stringify(state.users));
-}
-
-function loadOffers() {
-  const raw = localStorage.getItem("mpnsOffers");
-  if (raw) {
-    state.offers = JSON.parse(raw);
-  } else {
-    state.offers = [...DEMO_OFFERS];
+/** Appel générique vers Google Apps Script */
+async function gasCall(payload) {
+  if (!GAS_URL || GAS_URL === "COLLE_TON_URL_ICI") {
+    // Fallback localStorage si l'URL n'est pas configurée
+    return null;
+  }
+  try {
+    const res = await fetch(GAS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" }, // requis pour éviter le CORS preflight
+      body: JSON.stringify(payload),
+    });
+    return await res.json();
+  } catch (err) {
+    console.warn("Google Sheets inaccessible, fallback localStorage", err);
+    return null;
   }
 }
 
-function saveOffers() {
+/** Charge les utilisateurs (Sheets → state.users) */
+async function loadUsers() {
+  const raw = localStorage.getItem("mpnsUsers");
+  state.users = raw ? JSON.parse(raw) : [];
+
+  const data = await gasCall({ action: "getUsers" });
+  if (data && data.ok) {
+    state.users = data.users;
+    localStorage.setItem("mpnsUsers", JSON.stringify(state.users));
+  }
+}
+
+/** Sauvegarde un nouvel utilisateur (state → Sheets + localStorage) */
+async function saveNewUser(user) {
+  state.users.push(user);
+  localStorage.setItem("mpnsUsers", JSON.stringify(state.users));
+  await gasCall({ action: "addUser", user });
+}
+
+/** Charge les trajets (Sheets → state.offers) */
+async function loadOffers() {
+  // D'abord le cache local pour affichage immédiat
+  const raw = localStorage.getItem("mpnsOffers");
+  state.offers = raw ? JSON.parse(raw) : [...DEMO_OFFERS];
+
+  const data = await gasCall({ action: "getOffers" });
+  if (data && data.ok && data.offers.length > 0) {
+    state.offers = data.offers;
+    localStorage.setItem("mpnsOffers", JSON.stringify(state.offers));
+  }
+}
+
+/** Sauvegarde un nouveau trajet (state → Sheets + localStorage) */
+async function saveNewOffer(offer) {
+  state.offers.unshift(offer);
   localStorage.setItem("mpnsOffers", JSON.stringify(state.offers));
+  await gasCall({ action: "addOffer", offer });
+}
+
+/** Met à jour le statut d'une demande (state → Sheets + localStorage) */
+async function updateRequest(offerId, reqIdx, updates) {
+  const offer = state.offers.find((o) => o.id === offerId);
+  if (!offer) return;
+  Object.assign(offer.requests[reqIdx], updates);
+  localStorage.setItem("mpnsOffers", JSON.stringify(state.offers));
+  await gasCall({ action: "updateOffer", offer });
+}
+
+/** Supprime un trajet (state → Sheets + localStorage) */
+async function deleteOffer(offerId) {
+  state.offers = state.offers.filter((o) => o.id !== offerId);
+  localStorage.setItem("mpnsOffers", JSON.stringify(state.offers));
+  await gasCall({ action: "deleteOffer", offerId });
 }
 
 /* ──────────────────────────────────────────────
@@ -255,7 +320,7 @@ document.getElementById("switchToLogin").addEventListener("click", (e) => {
 ────────────────────────────────────────────── */
 
 /* Inscription */
-document.getElementById("btnDoRegister").addEventListener("click", () => {
+document.getElementById("btnDoRegister").addEventListener("click", async () => {
   const first = document.getElementById("regFirst").value.trim();
   const last  = document.getElementById("regLast").value.trim();
   const email = document.getElementById("regEmail").value.trim();
@@ -276,29 +341,44 @@ document.getElementById("btnDoRegister").addEventListener("click", () => {
     return;
   }
 
+  const btnReg = document.getElementById("btnDoRegister");
+  btnReg.textContent = "Inscription en cours…";
+  btnReg.disabled = true;
+
   const role = promo === "Admin" ? "admin" : "user";
   const newUser = { first, last, email, phone, promo, pwd, role, createdAt: new Date().toISOString() };
-  state.users.push(newUser);
-  saveUsers();
 
-  // Enregistre le nouvel utilisateur dans la session
+  await saveNewUser(newUser);
+
   state.user = { first, last, email, promo, role };
   closeModal("modalRegister");
   onLogin();
   showToast(`🌿 Bienvenue sur MovePNS, ${first} !`);
+
+  btnReg.textContent = "Créer mon compte 🌿";
+  btnReg.disabled = false;
 });
 
 /* Connexion */
-document.getElementById("btnDoLogin").addEventListener("click", () => {
+document.getElementById("btnDoLogin").addEventListener("click", async () => {
   const email = document.getElementById("loginEmail").value.trim();
   const pwd   = document.getElementById("loginPwd").value;
 
   if (!isValidEmail(email)) { showToast("⚠️ Email invalide"); return; }
   if (pwd.length < 3) { showToast("⚠️ Mot de passe incorrect"); return; }
 
+  const btnLog = document.getElementById("btnDoLogin");
+  btnLog.textContent = "Connexion…";
+  btnLog.disabled = true;
+
+  // Recharge les utilisateurs depuis Sheets pour être à jour
+  await loadUsers();
+
   const found = state.users.find((u) => u.email.toLowerCase() === email.toLowerCase() && u.pwd === pwd);
   if (!found) {
     showToast("⚠️ Identifiants incorrects ou compte inexistant");
+    btnLog.textContent = "Se connecter";
+    btnLog.disabled = false;
     return;
   }
 
@@ -306,6 +386,9 @@ document.getElementById("btnDoLogin").addEventListener("click", () => {
   closeModal("modalLogin");
   onLogin();
   showToast("✅ Connexion réussie !");
+
+  btnLog.textContent = "Se connecter";
+  btnLog.disabled = false;
 });
 
 /* Actions post-connexion */
@@ -414,20 +497,21 @@ function renderOffers(offers) {
 
   // Boutons "Rejoindre"
   list.querySelectorAll("button[data-id]").forEach((btn) => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async () => {
       const offerId = +btn.dataset.id;
       const offer = state.offers.find((o) => o.id === offerId);
       if (!offer.requests) offer.requests = [];
-      // Vérifier si déjà demandé
       if (offer.requests.some((r) => r.userEmail === state.user.email)) {
         showToast("⚠️ Vous avez déjà demandé à rejoindre ce trajet");
         return;
       }
-      offer.requests.push({ userEmail: state.user.email, status: 'pending', comment: '' });
-      saveOffers();
+      btn.textContent = "Envoi…";
+      btn.disabled = true;
+      const reqIdx = offer.requests.length;
+      offer.requests.push({ userEmail: state.user.email, status: "pending", comment: "" });
+      await updateRequest(offerId, reqIdx, {});
       showToast(`✅ Demande envoyée à ${offer.driver} !`);
       btn.textContent = "Demande envoyée";
-      btn.disabled = true;
       btn.style.opacity = ".6";
     });
   });
@@ -502,41 +586,34 @@ function renderMyTrips() {
 
   // Événements pour accepter/refuser
   container.querySelectorAll(".btn-accept").forEach((btn) => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async () => {
       const item = btn.closest(".request-item");
       const offerId = +item.dataset.offerId;
-      const reqIdx = +item.dataset.reqIdx;
-      const offer = state.offers.find((o) => o.id === offerId);
-      offer.requests[reqIdx].status = 'accepted';
-      saveOffers();
+      const reqIdx  = +item.dataset.reqIdx;
+      await updateRequest(offerId, reqIdx, { status: "accepted" });
       renderMyTrips();
       showToast("✅ Demande acceptée");
     });
   });
 
   container.querySelectorAll(".btn-reject").forEach((btn) => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async () => {
       const item = btn.closest(".request-item");
       const offerId = +item.dataset.offerId;
-      const reqIdx = +item.dataset.reqIdx;
-      const offer = state.offers.find((o) => o.id === offerId);
-      offer.requests[reqIdx].status = 'rejected';
-      saveOffers();
+      const reqIdx  = +item.dataset.reqIdx;
+      await updateRequest(offerId, reqIdx, { status: "rejected" });
       renderMyTrips();
       showToast("❌ Demande refusée");
     });
   });
 
-  // Événements pour sauvegarder commentaire
   container.querySelectorAll(".btn-save-comment").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const item = btn.closest(".request-item");
+    btn.addEventListener("click", async () => {
+      const item    = btn.closest(".request-item");
       const offerId = +item.dataset.offerId;
-      const reqIdx = +item.dataset.reqIdx;
+      const reqIdx  = +item.dataset.reqIdx;
       const comment = item.querySelector(".comment-input").value;
-      const offer = state.offers.find((o) => o.id === offerId);
-      offer.requests[reqIdx].comment = comment;
-      saveOffers();
+      await updateRequest(offerId, reqIdx, { comment });
       showToast("💬 Commentaire sauvegardé");
     });
   });
@@ -607,10 +684,9 @@ function renderAdminPanel() {
     });
 
     offersContainer.querySelectorAll(".admin-delete-offer").forEach((btn) => {
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", async () => {
         const offerId = +btn.dataset.id;
-        state.offers = state.offers.filter((o) => o.id !== offerId);
-        saveOffers();
+        await deleteOffer(offerId);
         renderOffers(state.offers);
         renderAdminPanel();
         showToast("🗑️ Trajet supprimé");
@@ -663,34 +739,35 @@ document.getElementById("btnPropose").addEventListener("click", async () => {
   if (!date)  { showToast("⚠️ Choisis une date"); return; }
   if (!hour)  { showToast("⚠️ Indique l'heure de départ"); return; }
 
-  const distance = 28; // distance fixe sur la version sans GPS
+  const btnProp = document.getElementById("btnPropose");
+  btnProp.textContent = "Publication en cours…";
+  btnProp.disabled = true;
 
-  // Ajoute le trajet en temps réel
+  const distance = 28;
   const newOffer = {
-    id:       Date.now(),
-    driver:   `${state.user.first} ${state.user.last}`,
-    avatar:   "🙋",
-    from,
-    to,
-    time:     hour,
-    seats:    parseInt(seats),
-    recur:    document.getElementById("propRecur").options[document.getElementById("propRecur").selectedIndex].text,
+    id:          Date.now(),
+    driver:      `${state.user.first} ${state.user.last}`,
+    avatar:      "🙋",
+    from, to,
+    time:        hour,
+    seats:       parseInt(seats),
+    recur:       document.getElementById("propRecur").options[document.getElementById("propRecur").selectedIndex].text,
     distance,
-    promo:    state.user.promo,
-    rating:   "–",
-    note:     document.getElementById("propNote").value.trim(),
+    promo:       state.user.promo,
+    rating:      "–",
+    note:        document.getElementById("propNote").value.trim(),
     driverEmail: state.user.email,
-    requests: []
+    requests:    [],
   };
-  state.offers.unshift(newOffer);
-  saveOffers();
+
+  await saveNewOffer(newOffer);
 
   showToast("🌿 Trajet publié avec succès !");
-  // Reset form
   document.getElementById("propFrom").value = "";
   document.getElementById("propDate").value = "";
   document.getElementById("propNote").value = "";
-  // Navigue vers la liste
+  btnProp.textContent = "Publier le trajet 🌿";
+  btnProp.disabled = false;
   setTimeout(() => navigateTo("offers"), 1200);
 });
 
@@ -891,9 +968,9 @@ function initTransportMap() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  loadUsers();
-  loadOffers();
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadUsers();
+  await loadOffers();
 
   // Page par défaut
   navigateTo("home");
