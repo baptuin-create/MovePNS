@@ -2,6 +2,7 @@
    MOVEPNS – app.js
    Logique : Navigation · Auth · Trajets · CO₂
    Stockage : Google Sheets via Apps Script
+   
 ═══════════════════════════════════════════════ */
 
 "use strict";
