@@ -11,7 +11,7 @@
    ⚙️  CONFIGURATION – À MODIFIER APRÈS DÉPLOIEMENT
    Colle ici l'URL obtenue depuis Google Apps Script
 ────────────────────────────────────────────── */
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwXAgkC3k6yx4jFoV6PZjEYz3RnS7dAnB1DHClal4seR10MdHeAual8S5ox18lOXYv7/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxZDWnS7IHc-LqQaBNdW7E7b7vCRtJvu1IfydFf-DQymBxiTF9E6ax9IQfGwSQuxX8/exec";
 // Exemple : "https://script.google.com/macros/s/AKfycbx.../exec"
 
 /* ──────────────────────────────────────────────
