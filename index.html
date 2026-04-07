@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MovePNS – Covoiturage Étudiant</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════
+       NAVIGATION
+  ═══════════════════════════════════════════════ -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="brand-icon">🍃</span>
+      <span class="brand-name">Move<strong>PNS</strong></span>
+    </div>
+    <div class="nav-links" id="navLinks">
+      <a href="#" class="nav-link active" data-page="home">Accueil</a>
+      <a href="#" class="nav-link" data-page="offers">Trajets</a>
+      <a href="#" class="nav-link" data-page="propose">Proposer</a>
+      <a href="#" class="nav-link nav-link-trips" data-page="trips" style="display:none;">Mes trajets</a>
+      <a href="#" class="nav-link" data-page="transport">Transports</a>
+      <a href="#" class="nav-link" data-page="impact">Mon Impact</a>
+      <a href="#" class="nav-link nav-link-admin" data-page="admin" style="display:none;">Admin</a>
+    </div>
+    <div class="nav-actions">
+      <button class="btn-ghost" id="btnLogin">Se connecter</button>
+      <button class="btn-primary" id="btnRegister">S'inscrire</button>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════
+       PAGE : HOME (Hero)
+  ═══════════════════════════════════════════════ -->
+  <main id="app">
+
+    <section class="page active" id="page-home">
+      <!-- Hero -->
+      <div class="hero">
+        <div class="hero-bg">
+          <div class="blob blob-1"></div>
+          <div class="blob blob-2"></div>
+          <div class="blob blob-3"></div>
+          <div class="grid-overlay"></div>
+        </div>
+        <div class="hero-content">
+          <div class="hero-tag">🌍 Développement durable · École d'ingénieurs</div>
+          <h1 class="hero-title">
+            Rejoignez le mouvement<br/>
+            <span class="highlight">zéro émission</span>
+          </h1>
+          <p class="hero-subtitle">
+            MovePNS connecte les étudiants pour covoiturer entre leur domicile et l'école.
+            Moins de CO₂, plus de lien social, moins de frais.
+          </p>
+          <div class="hero-cta">
+            <button class="btn-primary btn-large" id="heroRegister">Créer mon compte</button>
+            <button class="btn-outline btn-large" id="heroExplore">Voir les trajets</button>
+          </div>
+          <div class="hero-stats">
+            <div class="stat">
+              <span class="stat-value" id="statUsers">0</span>
+              <span class="stat-label">Étudiants inscrits</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat">
+              <span class="stat-value" id="statTrips">0</span>
+              <span class="stat-label">Trajets proposés</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat">
+              <span class="stat-value" id="statCo2">0</span>
+              <span class="stat-label">kg CO₂ économisés</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="car-card floating">
+            <div class="car-route">
+              <span class="route-dot home"></span>
+              <span class="route-line"></span>
+              <span class="route-dot school"></span>
+            </div>
+            <div class="car-info">
+              <p class="car-from">Résidence Les Pins</p>
+              <p class="car-to">→ Polytech Nice Sophia</p>
+              <div class="car-meta">
+                <span>🕗 07h45</span>
+                <span>👥 2 places</span>
+                <span class="co2-badge">-3.2 kg CO₂</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Features -->
+      <section class="features">
+        <h2 class="section-title">Pourquoi MovePNS ?</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🌱</div>
+            <h3>Écologique</h3>
+            <p>Chaque trajet partagé réduit significativement les émissions de CO₂ et allège le trafic routier.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">💸</div>
+            <h3>Économique</h3>
+            <p>Divisez vos frais de carburant et de stationnement. Économisez jusqu'à 80€/mois.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🤝</div>
+            <h3>Social</h3>
+            <p>Créez du lien avec vos camarades. Commencez la journée avec une bonne conversation.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3>Sécurisé</h3>
+            <p>Réservé aux étudiants de votre école. Profils vérifiés et avis de la communauté.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- How it works -->
+      <section class="how-it-works">
+        <h2 class="section-title">Comment ça marche ?</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">01</div>
+            <h3>Inscris-toi</h3>
+            <p>Crée ton compte avec ton email étudiant en quelques secondes.</p>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step">
+            <div class="step-number">02</div>
+            <h3>Publie ou rejoins</h3>
+            <p>Propose un trajet ou rejoins un covoiturage existant.</p>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step">
+            <div class="step-number">03</div>
+            <h3>Roule & économise</h3>
+            <p>Rends-toi à l'école tout en réduisant ton empreinte carbone.</p>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         PAGE : TRAJETS DISPONIBLES
+    ═══════════════════════════════════════════════ -->
+    <section class="page" id="page-offers">
+      <div class="page-header">
+        <h1>Trajets disponibles</h1>
+        <p>Trouve un covoiturage près de chez toi</p>
+      </div>
+
+      <!-- Search bar -->
+      <div class="search-bar">
+        <div class="search-field">
+          <label>🏠 Départ</label>
+          <input type="text" id="searchFrom" placeholder="Votre quartier ou ville..." />
+        </div>
+        <div class="search-field">
+          <label>📅 Date</label>
+          <input type="date" id="searchDate" />
+        </div>
+        <div class="search-field">
+          <label>🕐 Heure</label>
+          <select id="searchTime">
+            <option value="">Toutes les heures</option>
+            <option value="morning">Matin (6h–9h)</option>
+            <option value="afternoon">Après-midi (12h–15h)</option>
+            <option value="evening">Soir (17h–20h)</option>
+          </select>
+        </div>
+        <button class="btn-primary" id="btnSearch">Rechercher</button>
+      </div>
+
+      <!-- Offer cards list -->
+      <div class="offers-list" id="offersList">
+        <!-- Cards injected by JS -->
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         PAGE : PROPOSER UN TRAJET
+    ═══════════════════════════════════════════════ -->
+    <section class="page" id="page-propose">
+      <div class="page-header">
+        <h1>Proposer un trajet</h1>
+        <p>Partage ta route et réduis ton impact carbone</p>
+      </div>
+
+      <div class="form-container">
+        <div class="form-card">
+          <div class="form-group">
+            <label for="propFrom">🏠 Lieu de départ</label>
+            <input type="text" id="propFrom" placeholder="Ex : Résidence Les Palmiers, Nice" />
+          </div>
+          <div class="form-group">
+            <label for="propTo">🏫 Destination</label>
+            <input type="text" id="propTo" value="Polytech Nice Sophia – Sophia Antipolis"  />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="propDate">📅 Date</label>
+              <input type="date" id="propDate" />
+            </div>
+            <div class="form-group">
+              <label for="propHour">🕐 Heure de départ</label>
+              <input type="time" id="propHour" value="07:45" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="propSeats">👥 Places disponibles</label>
+              <select id="propSeats">
+                <option value="1">1 place</option>
+                <option value="2" selected>2 places</option>
+                <option value="3">3 places</option>
+                <option value="4">4 places</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="propRecur">🔁 Récurrence</label>
+              <select id="propRecur">
+                <option value="once">Trajet unique</option>
+                <option value="weekly">Hebdomadaire</option>
+                <option value="daily">Quotidien</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="propNote">💬 Message (optionnel)</label>
+            <textarea id="propNote" rows="3" placeholder="Ex : Je passe par Antibes, point de RDV possible à la gare..."></textarea>
+          </div>
+
+          <!-- CO2 estimator -->
+          <div class="co2-estimator">
+            <div class="co2-label">Distance estimée</div>
+            <div class="co2-value" id="distanceEstimate">–</div>
+            <div class="co2-sub">km (calcul GPS estimé)</div>
+          </div>
+          <div class="co2-estimator">
+            <div class="co2-label">Estimation CO₂ économisé par passager</div>
+            <div class="co2-value" id="co2Estimate">–</div>
+            <div class="co2-sub">par rapport à un trajet solo</div>
+          </div>
+
+          <button class="btn-primary btn-full" id="btnPropose">Publier le trajet 🌿</button>
+        </div>
+
+        <div class="form-aside">
+          <div class="aside-card eco">
+            <h3>🌍 Votre impact</h3>
+            <p>En partageant votre trajet quotidien Nice → Sophia Antipolis (environ 30 km), vous économisez en moyenne <strong>4 kg de CO₂</strong> par jour et par passager.</p>
+            <p>Sur un semestre (90 jours) : c'est <strong>360 kg de CO₂</strong> en moins dans l'atmosphère !</p>
+          </div>
+          <div class="aside-card tip">
+            <h3>💡 Bon à savoir</h3>
+            <ul>
+              <li>Indiquez votre point de rendez-vous précis</li>
+              <li>Respectez l'heure convenue</li>
+              <li>Le partage des frais est à négocier entre étudiants</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         PAGE : MON IMPACT
+    ═══════════════════════════════════════════════ -->
+    <section class="page" id="page-impact">
+      <div class="page-header">
+        <h1>Mon Impact Écologique</h1>
+        <p>Visualise ta contribution au développement durable</p>
+      </div>
+
+      <div class="impact-grid">
+        <div class="impact-hero-card">
+          <div class="impact-total">
+            <div class="impact-circle">
+              <svg viewBox="0 0 120 120" class="circle-svg">
+                <circle cx="60" cy="60" r="52" class="circle-bg"/>
+                <circle cx="60" cy="60" r="52" class="circle-prog" id="circleProgress"/>
+              </svg>
+              <div class="circle-label">
+                <span class="circle-value" id="totalCo2">24.6</span>
+                <span class="circle-unit">kg CO₂</span>
+              </div>
+            </div>
+            <p class="impact-desc">économisés ce mois-ci</p>
+          </div>
+          <div class="impact-equiv">
+            <h3>Équivalences</h3>
+            <div class="equiv-list">
+              <div class="equiv"><span class="equiv-icon">🌲</span><span>1.2 arbres plantés</span></div>
+              <div class="equiv"><span class="equiv-icon">✈️</span><span>= 0.1 vol Paris–Nice</span></div>
+              <div class="equiv"><span class="equiv-icon">🚗</span><span>123 km en voiture évités</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="impact-stats-col">
+          <div class="mini-stat">
+            <span class="mini-icon">🚗</span>
+            <div>
+              <span class="mini-value">18</span>
+              <span class="mini-label">Trajets effectués</span>
+            </div>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-icon">👥</span>
+            <div>
+              <span class="mini-value">34</span>
+              <span class="mini-label">Passagers transportés</span>
+            </div>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-icon">💶</span>
+            <div>
+              <span class="mini-value">67€</span>
+              <span class="mini-label">Économisés (carburant)</span>
+            </div>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-icon">⭐</span>
+            <div>
+              <span class="mini-value">4.9/5</span>
+              <span class="mini-label">Note communauté</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="impact-chart-card">
+          <h3>CO₂ économisé – 6 derniers mois</h3>
+          <div class="bar-chart" id="barChart">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <div class="impact-badge-card">
+          <h3>Mes badges 🏆</h3>
+          <div class="badges-grid">
+            <div class="badge earned" title="Premier trajet">🌱<span>Débutant</span></div>
+            <div class="badge earned" title="10 trajets">🌿<span>Régulier</span></div>
+            <div class="badge earned" title="50 kg CO₂">🌍<span>Éco-acteur</span></div>
+            <div class="badge" title="100 trajets">🚀<span>Expert</span></div>
+            <div class="badge" title="500 kg CO₂">🌳<span>Forêt</span></div>
+            <div class="badge" title="Parrain 5 amis">🤝<span>Ambassadeur</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         PAGE : MES TRAJETS
+    ═══════════════════════════════════════════════ -->
+    <section class="page" id="page-trips">
+      <div class="page-header">
+        <h1>Mes trajets</h1>
+        <p>Gérer vos offres de covoiturage</p>
+      </div>
+      <div id="myTripsContainer">
+        <!-- Injected by JS -->
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         PAGE : TRANSPORTS EN COMMUN
+    ═══════════════════════════════════════════════ -->
+    <section class="page" id="page-transport">
+      <div class="page-header">
+        <h1>Transports en commun</h1>
+        <p>Lignes de bus, tram, train et vélos en libre-service vers Polytech Nice Sophia</p>
+      </div>
+
+      <!-- Filtres -->
+      <div class="transport-filters">
+        <button class="filter-btn active" data-layer="all">Tout afficher</button>
+        <button class="filter-btn" data-layer="train">🚆 Train / TER</button>
+        <button class="filter-btn" data-layer="tram">🚊 Tramway</button>
+        <button class="filter-btn" data-layer="bus">🚌 Bus</button>
+        <button class="filter-btn" data-layer="bike">🚲 Vélos</button>
+      </div>
+
+      <!-- Carte Leaflet -->
+      <div class="map-wrapper">
+        <div id="transportMap"></div>
+        <div class="map-legend">
+          <h4>Légende</h4>
+          <div class="legend-item"><span class="legend-dot" style="background:#e74c3c"></span> TER / Train SNCF</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#3498db"></span> Tramway T2 (Nice)</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#f39c12"></span> Bus 230 (Antibes → Sophia)</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#9b59b6"></span> Bus 11 / Envibus</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#27ae60"></span> Bus 110 (Cannes → Sophia)</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#e84393"></span> ZOU ! 630/631 (Nice/Antibes → Sophia)</div>
+          <div class="legend-item"><span class="legend-dot bike-dot"></span> 🚲 Vélos (Lime / Vélo Azur)</div>
+          <div class="legend-item"><span class="legend-dot school-dot"></span> 🏫 Polytech Nice Sophia</div>
+        </div>
+      </div>
+
+      <!-- Fiches lignes -->
+      <div class="transport-cards">
+        <div class="transport-card train">
+          <div class="tc-header">
+            <span class="tc-icon">🚆</span>
+            <div>
+              <h3>TER Nice–Antibes–Cannes</h3>
+              <span class="tc-badge" style="background:#e74c3c">Train SNCF</span>
+            </div>
+          </div>
+          <p>Ligne ferroviaire côtière. Arrêt <strong>Sophia Antipolis</strong> non desservie directement – descendre à <strong>Antibes</strong> puis prendre le bus 230.</p>
+          <div class="tc-info">
+            <span>⏱ ~20 min Nice → Antibes</span>
+            <span>🕗 Fréquence : 15–30 min</span>
+            <span>💶 ~3–5 € / trajet</span>
+          </div>
+        </div>
+
+        <div class="transport-card tram">
+          <div class="tc-header">
+            <span class="tc-icon">🚊</span>
+            <div>
+              <h3>Tramway T2 – Nice</h3>
+              <span class="tc-badge" style="background:#3498db">Lignes Azur</span>
+            </div>
+          </div>
+          <p>Dessert l'ouest de Nice jusqu'à la gare de <strong>Nice Saint-Augustin</strong>, point de correspondance vers la gare SNCF pour le TER.</p>
+          <div class="tc-info">
+            <span>⏱ 5h00 – 00h30</span>
+            <span>🕗 Fréquence : 6–10 min</span>
+            <span>💶 1.70 € / trajet</span>
+          </div>
+        </div>
+
+        <div class="transport-card bus orange">
+          <div class="tc-header">
+            <span class="tc-icon">🚌</span>
+            <div>
+              <h3>Bus 230 – Antibes → Sophia</h3>
+              <span class="tc-badge" style="background:#f39c12">Envibus</span>
+            </div>
+          </div>
+          <p>Relie directement <strong>Antibes gare SNCF</strong> à <strong>Sophia Antipolis</strong>. Dessert les principaux campus dont Polytech.</p>
+          <div class="tc-info">
+            <span>⏱ ~25 min</span>
+            <span>🕗 Fréquence : 30 min (matin)</span>
+            <span>💶 1.50 € / trajet</span>
+          </div>
+        </div>
+
+        <div class="transport-card bus purple">
+          <div class="tc-header">
+            <span class="tc-icon">🚌</span>
+            <div>
+              <h3>Bus 11 / Envibus – Nice → Sophia</h3>
+              <span class="tc-badge" style="background:#9b59b6">Envibus</span>
+            </div>
+          </div>
+          <p>Liaison directe depuis <strong>Nice centre</strong> vers Sophia Antipolis via Cagnes-sur-Mer et Villeneuve-Loubet.</p>
+          <div class="tc-info">
+            <span>⏱ ~50 min</span>
+            <span>🕗 Fréquence : 30–60 min</span>
+            <span>💶 1.50 € / trajet</span>
+          </div>
+        </div>
+
+        <div class="transport-card bus green">
+          <div class="tc-header">
+            <span class="tc-icon">🚌</span>
+            <div>
+              <h3>Bus 110 – Cannes → Sophia</h3>
+              <span class="tc-badge" style="background:#27ae60">Envibus</span>
+            </div>
+          </div>
+          <p>Relie <strong>Cannes gare SNCF</strong> à Sophia Antipolis via Mougins. Idéal pour les étudiants cannois.</p>
+          <div class="tc-info">
+            <span>⏱ ~35 min</span>
+            <span>🕗 Fréquence : 30 min (heures de pointe)</span>
+            <span>💶 1.50 € / trajet</span>
+          </div>
+        </div>
+
+        <div class="transport-card bus zou">
+          <div class="tc-header">
+            <span class="tc-icon">🚌</span>
+            <div>
+              <h3>ZOU ! Bus 630 – Nice → Sophia</h3>
+              <span class="tc-badge" style="background:#e84393">ZOU · Région PACA</span>
+            </div>
+          </div>
+          <p>Ligne régionale <strong>ZOU !</strong> reliant directement <strong>Nice Gare Routière</strong> à Sophia Antipolis via Saint-Laurent-du-Var, Cagnes et Villeneuve-Loubet. Tarif réduit pour les étudiants avec l'abonnement Zou Solidaire.</p>
+          <div class="tc-info">
+            <span>⏱ ~55 min</span>
+            <span>🕗 Fréquence : ~1h</span>
+            <span>💶 1 € (abonnement Zou)</span>
+            <span>📱 App Zou PACA</span>
+          </div>
+        </div>
+
+        <div class="transport-card bus zou-light">
+          <div class="tc-header">
+            <span class="tc-icon">🚌</span>
+            <div>
+              <h3>ZOU ! Bus 631 – Antibes → Sophia</h3>
+              <span class="tc-badge" style="background:#c0392b">ZOU · Région PACA</span>
+            </div>
+          </div>
+          <p>Variante ZOU depuis <strong>Antibes Gare</strong> via Biot vers Sophia Antipolis. Complémentaire du bus Envibus 230, souvent moins chargé en heures creuses.</p>
+          <div class="tc-info">
+            <span>⏱ ~25 min</span>
+            <span>🕗 Fréquence : variable</span>
+            <span>💶 1 € (abonnement Zou)</span>
+          </div>
+        </div>
+
+        <div class="transport-card bike-card">
+          <div class="tc-header">
+            <span class="tc-icon">🚲</span>
+            <div>
+              <h3>Vélos en libre-service</h3>
+              <span class="tc-badge" style="background:#1a3c2e">Lime · Vélo Azur</span>
+            </div>
+          </div>
+          <p><strong>Lime</strong> (trottinettes & vélos électriques) : disponibles à Nice, Antibes et Sophia Antipolis. <strong>Vélo Azur</strong> : réseau de Nice avec stations fixes. Parfait pour le dernier kilomètre depuis un arrêt de bus ou de tram.</p>
+          <div class="tc-info">
+            <span>📱 App Lime / Vélo Azur</span>
+            <span>💶 ~0.25 €/min (Lime)</span>
+            <span>🌿 Zéro émission</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         PAGE : ADMIN
+    ═══════════════════════════════════════════════ -->
+    <section class="page" id="page-admin">
+      <div class="page-header">
+        <h1>Tableau de bord administrateur</h1>
+        <p>Gérer utilisateurs et trajets</p>
+      </div>
+      <div class="admin-block">
+        <h2>Liste des utilisateurs</h2>
+        <div id="adminUsers">Chargement...</div>
+      </div>
+      <div class="admin-block">
+        <h2>Offres de covoiturage</h2>
+        <div id="adminOffers">Chargement...</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════════════
+       MODAL : CONNEXION
+  ═══════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modalLogin">
+    <div class="modal">
+      <button class="modal-close" data-close="modalLogin">✕</button>
+      <div class="modal-header">
+        <span class="modal-logo">🍃</span>
+        <h2>Connexion</h2>
+        <p>Bienvenue de retour sur MovePNS</p>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Email étudiant</label>
+          <input type="email" id="loginEmail" placeholder="prenom.nom@polytech.fr" />
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" id="loginPwd" placeholder="••••••••" />
+        </div>
+        <button class="btn-primary btn-full" id="btnDoLogin">Se connecter</button>
+        <p class="modal-switch">Pas encore de compte ? <a href="#" id="switchToRegister">S'inscrire</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       MODAL : INSCRIPTION
+  ═══════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modalRegister">
+    <div class="modal">
+      <button class="modal-close" data-close="modalRegister">✕</button>
+      <div class="modal-header">
+        <span class="modal-logo">🍃</span>
+        <h2>Créer un compte</h2>
+        <p>Rejoins la communauté MovePNS</p>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Prénom</label>
+            <input type="text" id="regFirst" placeholder="Lucas" />
+          </div>
+          <div class="form-group">
+            <label>Nom</label>
+            <input type="text" id="regLast" placeholder="Martin" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email étudiant</label>
+          <input type="email" id="regEmail" placeholder="prenom.nom@polytech.fr" />
+        </div>
+        <div class="form-group">
+          <label>Numéro de téléphone</label>
+          <input type="tel" id="regPhone" placeholder="06 12 34 56 78" />
+        </div>
+        <div class="form-group">
+          <label>Promotion</label>
+          <select id="regPromo">
+            <option value="">Sélectionner...</option>
+            <option>PEIP1</option>
+            <option>PEIP2</option>
+            <option>3ème année</option>
+            <option>4ème année</option>
+            <option>5ème année</option>
+            
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" id="regPwd" placeholder="••••••••" />
+        </div>
+        <div class="form-group checkbox-group">
+          <input type="checkbox" id="regTerms" />
+          <label for="regTerms">J'accepte les <a href="#">conditions d'utilisation</a></label>
+        </div>
+        <button class="btn-primary btn-full" id="btnDoRegister">Créer mon compte 🌿</button>
+        <p class="modal-switch">Déjà un compte ? <a href="#" id="switchToLogin">Se connecter</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       TOAST NOTIFICATION
+  ═══════════════════════════════════════════════ -->
+  <div class="toast" id="toast">
+    <span id="toastMsg"></span>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="brand-icon">🍃</span>
+        <span class="brand-name">Move<strong>PNS</strong></span>
+        <p>Projet étudiant · Développement durable</p>
+      </div>
+      <div class="footer-links">
+        <a href="#">À propos</a>
+        <a href="#">CGU</a>
+        <a href="#">Contact</a>
+        <a href="#">GitHub</a>
+      </div>
+      <p class="footer-copy">© 2025 MovePNS – École d'ingénieurs</p>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
