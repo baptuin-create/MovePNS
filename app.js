@@ -483,6 +483,8 @@ function renderOffers(offers) {
   }
 
   offers.forEach((o, i) => {
+    const acceptedCount = (o.requests || []).filter((r) => r.status === "accepted").length;
+    const remainingSeats = Math.max(0, Number(o.seats) - acceptedCount);
     const co2 = calcCo2(o.distance, 2);
     const card = document.createElement("div");
     card.className = "offer-card";
@@ -502,7 +504,7 @@ function renderOffers(offers) {
         </div>
       </div>
       <div class="offer-actions">
-        <div class="offer-seats">${o.seats} <span>place${o.seats > 1 ? "s" : ""}</span></div>
+        <div class="offer-seats">${remainingSeats} <span>place${remainingSeats > 1 ? "s" : ""} restante${remainingSeats > 1 ? "s" : ""}</span></div>
         <button class="btn-primary" style="font-size:.82rem;padding:.45rem 1rem;" data-id="${o.id}">Rejoindre</button>
       </div>
     `;
@@ -604,15 +606,26 @@ function renderMyTrips() {
   }
 
   container.querySelectorAll(".btn-accept").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const item = btn.closest(".request-item");
-      const offerId = +item.dataset.offerId;
-      const reqIdx = +item.dataset.reqIdx;
-      await updateRequest(offerId, reqIdx, { status: "accepted" });
-      renderMyTrips();
-      showToast("✅ Demande acceptée");
-    });
+  btn.addEventListener("click", async () => {
+    const item = btn.closest(".request-item");
+    const offerId = +item.dataset.offerId;
+    const reqIdx  = +item.dataset.reqIdx;
+
+    const offer = state.offers.find((o) => o.id === offerId);
+    if (!offer) return;
+
+    const acceptedCount = (offer.requests || []).filter((r) => r.status === "accepted").length;
+
+    if (acceptedCount >= Number(offer.seats)) {
+      showToast("⚠️ Nombre maximum de passagers atteint");
+      return;
+    }
+
+    await updateRequest(offerId, reqIdx, { status: "accepted" });
+    renderMyTrips();
+    showToast("✅ Demande acceptée");
   });
+});
 
   container.querySelectorAll(".btn-reject").forEach((btn) => {
     btn.addEventListener("click", async () => {
