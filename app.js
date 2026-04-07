@@ -52,8 +52,8 @@ async function loadUsers() {
   state.users = raw ? JSON.parse(raw) : [];
 
   const data = await gasCall({ action: "getUsers" });
-  if (data && data.ok) {
-    state.users = data.users;
+  if (data && data.ok && Array.isArray(data.users)) {
+    state.users = data.users.filter((u) => u && typeof u === "object");
     localStorage.setItem("mpnsUsers", JSON.stringify(state.users));
   }
 }
@@ -371,24 +371,36 @@ document.getElementById("btnDoLogin").addEventListener("click", async () => {
   btnLog.textContent = "Connexion…";
   btnLog.disabled = true;
 
-  // Recharge les utilisateurs depuis Sheets pour être à jour
-  await loadUsers();
+  try {
+    await loadUsers();
 
-  const found = state.users.find((u) => u.email.toLowerCase() === email.toLowerCase() && u.pwd === pwd);
-  if (!found) {
-    showToast("⚠️ Identifiants incorrects ou compte inexistant");
+    const found = state.users.find(
+      (u) => String(u.email || "").toLowerCase() === email.toLowerCase() && String(u.pwd || "") === pwd
+    );
+
+    if (!found) {
+      showToast("⚠️ Identifiants incorrects ou compte inexistant");
+      return;
+    }
+
+    state.user = {
+      first: found.first,
+      last: found.last,
+      email: found.email,
+      promo: found.promo,
+      role: found.role
+    };
+
+    closeModal("modalLogin");
+    onLogin();
+    showToast("✅ Connexion réussie !");
+  } catch (err) {
+    console.error("Erreur connexion :", err);
+    showToast("⚠️ Erreur lors de la connexion");
+  } finally {
     btnLog.textContent = "Se connecter";
     btnLog.disabled = false;
-    return;
   }
-
-  state.user = { first: found.first, last: found.last, email: found.email, promo: found.promo, role: found.role };
-  closeModal("modalLogin");
-  onLogin();
-  showToast("✅ Connexion réussie !");
-
-  btnLog.textContent = "Se connecter";
-  btnLog.disabled = false;
 });
 
 /* Actions post-connexion */
