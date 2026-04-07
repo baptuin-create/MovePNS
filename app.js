@@ -31,16 +31,20 @@ const state = {
 /** Appel générique vers Google Apps Script */
 async function gasCall(payload) {
   if (!GAS_URL || GAS_URL === "COLLE_TON_URL_ICI") {
-    // Fallback localStorage si l'URL n'est pas configurée
     return null;
   }
+
   try {
-    const res = await fetch(GAS_URL, {
+    await fetch(GAS_URL, {
       method: "POST",
-      headers: { "Content-Type": "text/plain" }, // requis pour éviter le CORS preflight
+      mode: "no-cors", // 🔥 correction principale
+      headers: { "Content-Type": "text/plain" },
       body: JSON.stringify(payload),
     });
-    return await res.json();
+
+    // Avec no-cors, on ne peut pas lire la réponse
+    return { ok: true };
+
   } catch (err) {
     console.warn("Google Sheets inaccessible, fallback localStorage", err);
     return null;
