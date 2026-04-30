@@ -3,7 +3,7 @@
 ────────────────────────────────────────────── */
 
 async function gasCall(payload) {
-  if (!GAS_URL || GAS_URL === "https://script.google.com/macros/s/AKfycbyX_0BsY9KgQOXM9AUyyqGCf-JQxSBODbmoAYp2it0YYz_ez9t_jTHK0H8dMt0VEddd/exec") {
+  if (!GAS_URL || GAS_URL === "https://script.google.com/macros/s/AKfycbyNMI1WykcUhT840QHjoT2FjaEb8TdeVZWqkkNJ8F-XCo-4Kttb2uYAu88-qfYMbRyP/exec") {
     return null;
   }
 
