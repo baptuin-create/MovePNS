@@ -9,7 +9,7 @@
 /* ──────────────────────────────────────────────
    ⚙️  CONFIGURATION – À MODIFIER APRÈS DÉPLOIEMENT
 ────────────────────────────────────────────── */
-var GAS_URL = "https://script.google.com/macros/s/AKfycbzBqf6slRPiDX8qhJXz7-4xm57BO7uw1QBcGEeM2zbWM2yZjt81jGBiccUPnBV8XlB8/exec";
+var GAS_URL = "https://script.google.com/macros/s/AKfycbwndV41ldQZ7C5is6oB7yeydVRiTabhpqoLk4G92liGqfYzmqJp4AR0IqaCNxGzvFc4/exec";
 
 /* ──────────────────────────────────────────────
    STATE
