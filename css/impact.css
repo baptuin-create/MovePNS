@@ -1,3 +1,8 @@
+  font-family: var(--font-head);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--green-dark);
+}
 .offer-seats span { font-size: .75rem; font-weight: 400; color: var(--text-light); }
 
 .offer-tooltip {
@@ -198,4 +203,3 @@
   border-radius: var(--radius-md);
   padding: 1.5rem;
   border: 1.5px solid;
-}

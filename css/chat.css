@@ -362,3 +362,124 @@
   .chat-more-btn { display: none; }
   .chat-app-shell .chat-composer .btn-primary { width: 42px; height: 42px; min-width: 42px; }
 }
+
+/* ── BOUTON "AJOUTER EN AMI" (en-tête panel) ── */
+.chat-friend-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .52rem 1.1rem;
+  border-radius: 999px;
+  border: 2px solid #1a7a3a;
+  background: #fff;
+  color: #1a7a3a;
+  font-family: var(--font-body);
+  font-size: .88rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .18s, color .18s, border-color .18s, transform .15s;
+}
+.chat-friend-pill:hover:not(:disabled) {
+  background: #1a7a3a;
+  color: #fff;
+  transform: translateY(-1px);
+}
+.chat-friend-pill:disabled { opacity: .7; cursor: default; transform: none; }
+.chat-friend-pill.is-friend {
+  border-color: #22c55e;
+  color: #16a34a;
+  background: #f0faf4;
+}
+.chat-friend-pill.is-pending {
+  border-color: #9ca3af;
+  color: #6b7280;
+  background: #f9fafb;
+}
+.chat-friend-pill.is-incoming {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+.chat-friend-pill.is-incoming:hover:not(:disabled) {
+  background: #2563eb;
+  color: #fff;
+}
+.friend-btn-icon { font-size: 1rem; line-height: 1; }
+.friend-btn-label { font-size: .86rem; }
+
+/* ── BOUTON "+ AMI" inline dans la liste ────── */
+.contact-add-friend {
+  display: inline-flex;
+  align-items: center;
+  padding: .3rem .7rem;
+  border-radius: 999px;
+  border: 1.5px solid #1a7a3a;
+  background: #fff;
+  color: #1a7a3a;
+  font-size: .76rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, color .15s;
+  grid-area: badge;
+  justify-self: end;
+  align-self: center;
+}
+.contact-add-friend:hover { background: #1a7a3a; color: #fff; }
+.contact-add-friend:disabled { opacity: .5; cursor: default; }
+
+/* Badges statut ami dans la liste */
+.contact-friend-badge {
+  display: inline-grid;
+  place-items: center;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  font-size: .72rem;
+  font-weight: 900;
+  grid-area: badge;
+  justify-self: end;
+  align-self: center;
+}
+.friend-ok       { background: #dcfce7; color: #16a34a; }
+.friend-pending  { background: #f3f4f6; color: #6b7280; }
+.friend-incoming { background: #dbeafe; color: #2563eb; }
+
+/* Ajuster la grille du contact pour inclure la colonne badge */
+.chat-app-shell .chat-contact {
+  grid-template-columns: 54px minmax(0,1fr) auto auto;
+  grid-template-areas:
+    "avatar main  time  badge"
+    "avatar small time  badge";
+}
+.chat-contact-right {
+  grid-area: time;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: .25rem;
+}
+/* On retire chat-time et chat-unread du grid direct car ils sont dans .chat-contact-right */
+.chat-time  { grid-area: unset; }
+.chat-unread { grid-area: unset; }
+
+/* Bouton accepter dans les demandes reçues */
+.btn-friend-action {
+  border-radius: 999px;
+  border: none;
+  padding: .42rem 1rem;
+  font-size: .82rem;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background .15s, transform .12s;
+}
+.btn-accept {
+  background: #1a7a3a;
+  color: #fff;
+}
+.btn-accept:hover { background: #125c2b; transform: scale(1.03); }
+.btn-accept:disabled { opacity: .6; cursor: default; transform: none; }
+
+/* S'assurer que la zone friend-zone est visible quand il y a des demandes */
+.friend-zone { display: block; }

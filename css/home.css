@@ -179,8 +179,3 @@
   justify-content: center;
   align-items: center;
   animation: fadeUp .8s .3s ease both;
-  font-family: var(--font-head);
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--green-dark);
-}
