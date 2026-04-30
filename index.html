@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MovePNS – Covoiturage Étudiant</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="css/style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
@@ -25,6 +25,8 @@
       <a href="#" class="nav-link" data-page="offers">Trajets</a>
       <a href="#" class="nav-link" data-page="propose">Proposer</a>
       <a href="#" class="nav-link nav-link-trips" data-page="trips" style="display:none;">Mes trajets</a>
+      <a href="#" class="nav-link nav-link-account" data-page="account" style="display:none;">Mon compte</a>
+      <a href="#" class="nav-link nav-link-chat" data-page="chat" style="display:none;">Chat</a>
       <a href="#" class="nav-link" data-page="transport">Transports</a>
       <a href="#" class="nav-link" data-page="impact">Mon Impact</a>
       <a href="#" class="nav-link nav-link-admin" data-page="admin" style="display:none;">Admin</a>
@@ -249,7 +251,7 @@
           <div class="co2-estimator">
             <div class="co2-label">Distance estimée</div>
             <div class="co2-value" id="distanceEstimate">–</div>
-            <div class="co2-sub">km (calcul GPS estimé)</div>
+            <div class="co2-sub">km environ (OpenStreetMap, sans clé API)</div>
           </div>
           <div class="co2-estimator">
             <div class="co2-label">Estimation CO₂ économisé par passager</div>
@@ -296,7 +298,7 @@
                 <circle cx="60" cy="60" r="52" class="circle-prog" id="circleProgress"/>
               </svg>
               <div class="circle-label">
-                <span class="circle-value" id="totalCo2">24.6</span>
+                <span class="circle-value" id="totalCo2">0</span>
                 <span class="circle-unit">kg CO₂</span>
               </div>
             </div>
@@ -316,29 +318,29 @@
           <div class="mini-stat">
             <span class="mini-icon">🚗</span>
             <div>
-              <span class="mini-value">18</span>
-              <span class="mini-label">Trajets effectués</span>
+              <span class="mini-value" id="impactTrips">0</span>
+              <span class="mini-label">Trajets acceptés</span>
             </div>
           </div>
           <div class="mini-stat">
             <span class="mini-icon">👥</span>
             <div>
-              <span class="mini-value">34</span>
-              <span class="mini-label">Passagers transportés</span>
+              <span class="mini-value" id="impactPassengers">0</span>
+              <span class="mini-label">Passagers / covoitureurs</span>
             </div>
           </div>
           <div class="mini-stat">
             <span class="mini-icon">💶</span>
             <div>
-              <span class="mini-value">67€</span>
-              <span class="mini-label">Économisés (carburant)</span>
+              <span class="mini-value" id="impactKm">0</span>
+              <span class="mini-label">km partagés estimés</span>
             </div>
           </div>
           <div class="mini-stat">
             <span class="mini-icon">⭐</span>
             <div>
-              <span class="mini-value">4.9/5</span>
-              <span class="mini-label">Note communauté</span>
+              <span class="mini-value" id="impactFriends">0</span>
+              <span class="mini-label">Contacts amis</span>
             </div>
           </div>
         </div>
@@ -374,6 +376,114 @@
       </div>
       <div id="myTripsContainer">
         <!-- Injected by JS -->
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         PAGE : MON COMPTE
+    ═══════════════════════════════════════════════ -->
+    <section class="page" id="page-account">
+      <div class="page-header">
+        <h1>Mon compte</h1>
+        <p>Consulte et modifie tes informations personnelles</p>
+      </div>
+      <div class="form-container single">
+        <div class="form-card" id="accountForm">
+          <div class="form-row">
+            <div class="form-group"><label>Prénom</label><input type="text" id="accountFirst" /></div>
+            <div class="form-group"><label>Nom</label><input type="text" id="accountLast" /></div>
+          </div>
+          <div class="form-group"><label>Email</label><input type="email" id="accountEmail" readonly /></div>
+          <div class="form-group"><label>Téléphone</label><input type="text" id="accountPhone" /></div>
+          <div class="form-group"><label>Promotion</label><select id="accountPromo"><option>PEIP1</option><option>PEIP2</option><option>3ème année</option><option>4ème année</option><option>5ème année</option><option>Admin</option><option>Professeur</option></select></div>
+
+          <div class="account-password-box">
+            <h3>Modifier mon mot de passe</h3>
+            <p>Laisse ces champs vides si tu ne veux pas changer ton mot de passe.</p>
+            <div class="form-row">
+              <div class="form-group"><label>Nouveau mot de passe</label><input type="password" id="accountNewPwd" placeholder="6 caractères minimum" /></div>
+              <div class="form-group"><label>Confirmer le mot de passe</label><input type="password" id="accountConfirmPwd" placeholder="Répéter le mot de passe" /></div>
+            </div>
+          </div>
+
+          <button class="btn-primary btn-full" id="btnSaveAccount">Sauvegarder mes informations</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         PAGE : CHAT
+    ═══════════════════════════════════════════════ -->
+    <section class="page" id="page-chat">
+      <div class="chat-app-shell">
+        <aside class="chat-rail" aria-label="Navigation chat">
+          <div class="chat-rail-brand"><span>🍃</span><strong>Move<span>PNS</span></strong></div>
+          <button class="chat-rail-item" data-page="home" title="Accueil"><span>⌂</span><small>Accueil</small></button>
+          <button class="chat-rail-item" data-page="offers" title="Trajets"><span>🚗</span><small>Trajets</small></button>
+          <button class="chat-rail-item active" title="Chat"><span>💬</span><small>Chat</small></button>
+          <button class="chat-rail-item" data-page="account" title="Mon compte"><span>♡</span><small>Compte</small></button>
+          <button class="chat-rail-item" data-page="impact" title="Mon impact"><span>🌿</span><small>Impact</small></button>
+          <div class="chat-rail-user">
+            <span class="chat-rail-avatar" id="chatRailAvatar">?</span>
+            <div><strong id="chatRailName">Moi</strong><small>En ligne</small></div>
+          </div>
+        </aside>
+
+        <aside class="chat-sidebar">
+          <div class="chat-sidebar-head">
+            <h1>Messages</h1>
+            <button class="chat-compose-btn" type="button" title="Nouvelle conversation">✎</button>
+          </div>
+
+          <div class="chat-search-wrap">
+            <span class="chat-search-icon">⌕</span>
+            <input type="text" id="chatSearch" placeholder="Rechercher un contact..." autocomplete="off" />
+          </div>
+          <small id="chatSearchHint" class="chat-search-hint">Recherche un prénom, un nom ou un email.</small>
+
+          <div class="chat-sidebar-section friend-zone">
+            <div class="chat-section-title"><span>Demandes d ami</span></div>
+            <div id="friendRequests"></div>
+          </div>
+
+          <div class="chat-sidebar-section conversations-zone">
+            <div class="chat-section-title"><span>Conversations</span><em>Récentes⌄</em></div>
+            <div id="chatContacts" class="chat-contact-results"></div>
+          </div>
+
+          <button class="chat-see-all" type="button">👥 Voir tous mes contacts <span>›</span></button>
+        </aside>
+
+        <section class="chat-panel">
+          <div class="chat-panel-header">
+            <div class="chat-current-user">
+              <span class="chat-current-avatar" id="chatHeaderAvatar">💬</span>
+              <div>
+                <h2 id="chatTitle">Choisis un contact</h2>
+                <p id="chatSubtitle">Recherche une personne pour commencer à discuter</p>
+              </div>
+            </div>
+            <div class="chat-header-actions">
+              <button type="button" id="btnAskFriend" class="chat-icon-btn chat-friend-btn" title="Demander en ami">☆</button>
+              <button type="button" class="chat-icon-btn" title="Partager">↗</button>
+              <button type="button" class="chat-icon-btn" title="Options">•••</button>
+              <button type="button" class="chat-icon-btn" title="Fermer">×</button>
+            </div>
+          </div>
+
+          <div class="chat-messages" id="chatMessages"></div>
+
+          <div class="chat-composer-wrap">
+            <div class="chat-composer">
+              <button type="button" class="chat-more-btn" title="Plus">•••</button>
+              <input type="text" id="chatInput" placeholder="Écrire un message..." />
+              <button type="button" class="chat-emoji-btn" title="Emoji">☺</button>
+              <button type="button" class="chat-attach-btn" title="Pièce jointe">⌇</button>
+              <button class="btn-primary" id="btnSendChat" title="Envoyer">➤</button>
+            </div>
+            <p class="chat-help">Sans être amis, tu peux envoyer un seul message. Après acceptation, la discussion est libre.</p>
+          </div>
+        </section>
       </div>
     </section>
 
@@ -629,6 +739,7 @@
             <option>3ème année</option>
             <option>4ème année</option>
             <option>5ème année</option>
+            <option>Professeur</option>
             
           </select>
         </div>
@@ -674,6 +785,19 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/demo-data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/navigation.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/pages/home.js"></script>
+  <script src="js/pages/offers.js"></script>
+  <script src="js/pages/propose.js"></script>
+  <script src="js/pages/impact.js"></script>
+  <script src="js/pages/account.js"></script>
+  <script src="js/pages/chat.js"></script>
+  <script src="js/pages/transport.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>

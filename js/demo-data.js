@@ -1,0 +1,80 @@
+/* ──────────────────────────────────────────────
+   DONNÉES DE DÉMONSTRATION
+────────────────────────────────────────────── */
+var DEMO_OFFERS = [
+  {
+    id: 1,
+    driver: "Sophie M.",
+    avatar: "👩",
+    from: "Résidence Les Collines, Nice",
+    time: "07h30",
+    seats: 2,
+    recur: "Quotidien",
+    distance: 28,
+    promo: "3ème année",
+    rating: 4.9,
+    note: "Je passe par l'A8 – point de RDV à la station BP de Nice Nord.",
+    driverEmail: "sophie.m@polytech.fr",
+    requests: []
+  },
+  {
+    id: 2,
+    driver: "Théo B.",
+    avatar: "👨",
+    from: "Antibes – centre-ville",
+    time: "08h00",
+    seats: 3,
+    recur: "Lun. Mer. Ven.",
+    distance: 14,
+    promo: "2ème année",
+    tel: "06 12 34 56 78",
+    note: "Départ depuis la place du Général de Gaulle à Antibes.",
+    driverEmail: "theo.b@polytech.fr",
+    requests: []
+  },
+  {
+    id: 3,
+    driver: "Camille R.",
+    avatar: "🧑",
+    from: "Cagnes-sur-Mer, gare SNCF",
+    time: "07h45",
+    seats: 1,
+    recur: "Quotidien",
+    distance: 10,
+    promo: "Master 1",
+    rating: 5.0,
+    note: "Dépose directement à l'entrée de l'école.",
+    driverEmail: "camille.r@polytech.fr",
+    requests: []
+  },
+  {
+    id: 4,
+    driver: "Léa D.",
+    avatar: "👩",
+    from: "Valbonne – Sophia Village",
+    time: "08h15",
+    seats: 2,
+    recur: "Mardi & Jeudi",
+    distance: 5,
+    promo: "1ère année",
+    rating: 4.8,
+    note: "",
+    driverEmail: "lea.d@polytech.fr",
+    requests: []
+  },
+  {
+    id: 5,
+    driver: "Maxime P.",
+    avatar: "👨",
+    from: "Villeneuve-Loubet",
+    time: "07h20",
+    seats: 3,
+    recur: "Quotidien",
+    distance: 18,
+    promo: "Master 2",
+    rating: 4.6,
+    note: "Arrivée garantie avant 8h.",
+    driverEmail: "maxime.p@polytech.fr",
+    requests: []
+  },
+];

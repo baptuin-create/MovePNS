@@ -1,0 +1,181 @@
+/* ═══════════════════════════════════════════════
+   MOVEPNS – style.css
+   Thème : Eco-Futuriste · Vert forêt + Blanc cassé
+   Polices : Syne (titres) + DM Sans (corps)
+═══════════════════════════════════════════════ */
+
+/* ── Variables ──────────────────────────────── */
+:root {
+  --green-dark:   #1a3c2e;
+  --green-mid:    #2d6a4f;
+  --green-light:  #52b788;
+  --green-pale:   #b7e4c7;
+  --green-mist:   #d8f3dc;
+  --accent:       #f4a261;
+  --accent-soft:  #fde8d3;
+  --white:        #fafaf8;
+  --off-white:    #f0ede6;
+  --text-dark:    #1a1a18;
+  --text-mid:     #4a5240;
+  --text-light:   #8a9082;
+  --border:       #d5e8cc;
+  --shadow-sm:    0 2px 8px rgba(26,60,46,.08);
+  --shadow-md:    0 8px 32px rgba(26,60,46,.14);
+  --shadow-lg:    0 20px 60px rgba(26,60,46,.18);
+  --radius-sm:    8px;
+  --radius-md:    16px;
+  --radius-lg:    24px;
+  --radius-xl:    40px;
+  --font-head:    'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+  --transition:   .25s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── Reset & Base ───────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--white);
+  color: var(--text-dark);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── Typography ─────────────────────────────── */
+h1, h2, h3 { font-family: var(--font-head); line-height: 1.15; }
+
+a { color: var(--green-mid); text-decoration: none; }
+a:hover { color: var(--green-light); }
+
+/* ══════════════════════════════════════════════
+   NAVBAR
+══════════════════════════════════════════════ */
+.navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 0 2.5rem;
+  height: 64px;
+  background: rgba(250, 250, 248, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  transition: box-shadow var(--transition);
+}
+.navbar.scrolled { box-shadow: var(--shadow-sm); }
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-family: var(--font-head);
+  font-size: 1.3rem;
+  color: var(--green-dark);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.brand-icon { font-size: 1.4rem; }
+.brand-name strong { color: var(--green-mid); }
+
+.nav-links {
+  display: flex;
+  gap: .25rem;
+  flex: 1;
+}
+.nav-link {
+  font-family: var(--font-body);
+  font-size: .9rem;
+  font-weight: 500;
+  color: var(--text-mid);
+  padding: .4rem .9rem;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition), color var(--transition);
+  cursor: pointer;
+}
+.nav-link:hover, .nav-link.active {
+  background: var(--green-mist);
+  color: var(--green-dark);
+}
+
+.nav-actions {
+  display: flex;
+  gap: .75rem;
+  align-items: center;
+}
+
+/* ── Buttons ────────────────────────────────── */
+.btn-primary {
+  background: var(--green-mid);
+  color: #fff;
+  border: none;
+  padding: .6rem 1.4rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: .9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+.btn-primary:hover {
+  background: var(--green-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(45,106,79,.35);
+}
+.btn-primary:active { transform: translateY(0); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-mid);
+  border: 1.5px solid var(--border);
+  padding: .55rem 1.3rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: .9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.btn-ghost:hover { border-color: var(--green-light); color: var(--green-dark); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--green-dark);
+  border: 2px solid var(--green-dark);
+  padding: .75rem 1.8rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-head);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.btn-outline:hover { background: var(--green-dark); color: #fff; }
+
+.btn-large { padding: .85rem 2rem; font-size: 1.05rem; border-radius: var(--radius-md); }
+.btn-full { width: 100%; padding: .85rem; font-size: 1rem; border-radius: var(--radius-md); margin-top: .5rem; }
+
+/* ── Hamburger ──────────────────────────────── */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px; height: 36px;
+  background: none; border: none; cursor: pointer;
+  margin-left: auto;
+}
+.hamburger span {
+  display: block; width: 22px; height: 2px;
+  background: var(--text-dark);
+  border-radius: 2px;
+  transition: all .3s;
+}
+
+/* ══════════════════════════════════════════════
+   PAGES SYSTEM
